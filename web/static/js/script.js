@@ -37,6 +37,9 @@ document.addEventListener('DOMContentLoaded', function() {
         // Disable scan button during scan
         scanButton.disabled = true;
         
+        // Add detailed console logging
+        console.log(`Starting scan of target: ${target}, ports: ${ports}`);
+        
         // Send scan request
         fetch('/api/scan', {
             method: 'POST',
@@ -49,8 +52,11 @@ document.addEventListener('DOMContentLoaded', function() {
             })
         })
         .then(response => {
+            console.log(`Received response with status: ${response.status}`);
             if (!response.ok) {
-                throw new Error('Network response was not ok');
+                return response.text().then(text => {
+                    throw new Error(`Server responded with status ${response.status}: ${text}`);
+                });
             }
             return response.json();
         })
@@ -90,7 +96,7 @@ document.addEventListener('DOMContentLoaded', function() {
             scanButton.disabled = false;
         })
         .catch(error => {
-            console.error('Error:', error);
+            console.error('Error details:', error);
             statusElement.textContent = `Error: ${error.message}`;
             statusElement.className = 'status error';
             scanButton.disabled = false;
